@@ -3,6 +3,22 @@
 
 typedef uint64_t U64;
 
+enum pieces { 
+    white_pawn, 
+    white_knight, 
+    white_bishop, 
+    white_rook, 
+    white_queen, 
+    white_king,
+    black_pawn,
+    black_knight,
+    black_bishop,
+    black_rook,
+    black_queen,
+    black_king,
+    empty
+    };
+
 // constants
 const uint64_t RANK_1 = 0x00000000000000FF;
 const uint64_t RANK_2 = 0x000000000000FF00;

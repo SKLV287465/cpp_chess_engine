@@ -3,6 +3,8 @@
 
 class Board {
     public:
+    // piece existence
+    const int piece_at_square(U64 rank, U64 file);
     // piece getters
     inline U64 get_white_pawns() const{return bitboards[0];}
 	inline U64 get_white_knights() const{return bitboards[1];}
@@ -18,8 +20,8 @@ class Board {
 	inline U64 get_black_queens() const{return bitboards[10];}
 	inline U64 get_black_king() const{return bitboards[11];}
 
-    std::list<Board> generate_white_moves(int depth);
-    std::list<Board> generate_black_moves(int depth);
+    std::list<Board> generate_white_moves();
+    std::list<Board> generate_black_moves();
 
     inline bool get_white_king_moved() const{return board_info & 0b10000000;};
     inline bool get_black_king_moved() const{return board_info & 0b01000000;};
@@ -30,15 +32,64 @@ class Board {
     inline bool get_white_king_check() const{return board_info & 0b00000010;};
     inline bool get_white_king_check() const{return board_info & 0b00000001;};
 
-    inline void set_white_king_moved() {board_info | 0b10000000;};
-    inline void set_black_king_moved() {board_info | 0b01000000;};
-    inline void set_white_lrook_moved() {board_info | 0b00100000;};
-    inline void set_white_rrook_moved() {board_info | 0b00010000;};
-    inline void set_black_lrook_moved() {board_info | 0b00001000;};
-    inline void set_black_rrook_moved() {board_info | 0b00000100;};
-    inline void set_white_king_check() {board_info | 0b00000010;};
-    inline void set_white_king_check() {board_info | 0b00000001;};
-
+    inline void set_white_king_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b10000000;
+        } else {
+            board_info &= 0b01111111;
+        }
+    };
+    inline void set_black_king_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b01000000;
+        } else {
+            board_info &= 0b10111111;
+        }
+    };
+    inline void set_white_lrook_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00100000;
+        } else {
+            board_info &= 0b11011111;
+        }
+    };
+    inline void set_white_rrook_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00010000;
+        } else {
+            board_info &= 0b11101111;
+        }
+    };
+    inline void set_black_lrook_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00001000;
+        } else {
+            board_info &= 0b11110111;
+        }
+    };
+    inline void set_black_rrook_moved(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00000100;
+        } else {
+            board_info &= 0b11111011;
+        }
+    };
+    inline void set_white_king_check(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00000010;
+        } else {
+            board_info &= 0b11111101;
+        }
+    };
+    inline void set_white_king_check(bool toggle) {
+        if (toggle) {
+            board_info |= 0b00000001;
+        } else {
+            board_info &= 0b11111110;
+        }
+    };
+    void move_piece(U64 prev_rank, U64 prev_file, U64 next_rank, U64 next_file);
+    void remove_piece(U64 rank, U64 file);
     private:
     int score;
     std::array<U64, 12> bitboards;
