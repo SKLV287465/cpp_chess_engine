@@ -71,12 +71,29 @@ std::list<Board> Board::generate_white_moves() {
     // do pawn movements
     // single push, includes promotions
     U64 single_push = (get_white_pawns() << 8) & (~occupied);
+    bool promotion = false;
+    if (single_push & RANK_8) {
+        promotion = true;
+    }
     while (single_push) {
         auto next_move = *this;
         auto pawn_move = single_push & -single_push;
-        next_move.remove_piece();
+        next_move.set_white_pawns(get_white_pawns() ^ (pawn_move >> 8));
+        if (promotion) {
+            auto knight_alternative = next_move;
+            knight_alternative.set_white_knights(knight_alternative.get_white_knights() | pawn_move);
+            possible_moves.push_back(knight_alternative);
+            next_move.set_white_queens(next_move.get_white_queens() | pawn_move);
+        } else {
+            next_move.set_white_pawns(next_move.get_white_pawns() | pawn_move);
+        }
+        // add the next move to possible moves
+        possible_moves.push_back(next_move);
         single_push &= -single_push;
     }
+    // double push
+    // pawn attack
+    // en passant
     // i need a sweeping loop
     // do king, knight, 
 

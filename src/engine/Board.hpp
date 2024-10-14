@@ -20,6 +20,19 @@ class Board {
 	inline U64 get_black_queens() const{return bitboards[10];}
 	inline U64 get_black_king() const{return bitboards[11];}
 
+    inline void set_white_pawns(U64 new_board) {bitboards[0] = new_board;}
+	inline void set_white_knights(U64 new_board) {bitboards[1] = new_board;}
+	inline void set_white_bishops(U64 new_board) {bitboards[2] = new_board;}
+	inline void set_white_rooks(U64 new_board) {bitboards[3] = new_board;}
+	inline void set_white_queens(U64 new_board) {bitboards[4] = new_board;}
+	inline void set_white_king(U64 new_board) {bitboards[5] = new_board;}
+	inline void set_black_pawns(U64 new_board) {bitboards[6] = new_board;}
+	inline void set_black_knights(U64 new_board) {bitboards[7] = new_board;}
+	inline void set_black_bishops(U64 new_board) {bitboards[8] = new_board;}
+	inline void set_black_rooks(U64 new_board) {bitboards[9] = new_board;}
+	inline void set_black_queens(U64 new_board) {bitboards[10] = new_board;}
+	inline void set_black_king(U64 new_board) {bitboards[11] = new_board;}
+
     std::list<Board> generate_white_moves();
     std::list<Board> generate_black_moves();
 
