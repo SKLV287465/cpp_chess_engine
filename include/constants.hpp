@@ -37,6 +37,9 @@ const uint64_t FILE_F = 0x2020202020202020;
 const uint64_t FILE_G = 0x4040404040404040;
 const uint64_t FILE_H = 0x8080808080808080;
 
+const U64 NOT_FILE_A = 0xfefefefefefefefe;
+const U64 NOT_FILE_H = 0x7f7f7f7f7f7f7f7f;
+
 const std::array<U64, 12> STARTING_POSITIONS = {
     // White pieces (first 6)
     0x000000000000FF00ULL,  // White Pawns (on Rank 2)
