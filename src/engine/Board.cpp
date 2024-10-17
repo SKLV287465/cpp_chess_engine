@@ -100,6 +100,8 @@ std::list<Board> Board::generate_white_moves() {
     while (double_push) {
         auto next_move = *this;
         auto pawn_move = double_push & -double_push;
+        // set the en passant flag
+        next_move.enpassant_w |= pawn_move >> 24;
         next_move.set_white_pawns(get_white_pawns() ^ (pawn_move >> 16));
         next_move.set_white_pawns(next_move.get_white_pawns() | pawn_move);
         possible_moves.push_back(next_move);
@@ -144,7 +146,50 @@ std::list<Board> Board::generate_white_moves() {
         promotion = false;
     }
     // en passant
-    
+    U64 left_enpassant = (get_white_pawns() << 9) & NOT_FILE_A & ~(white_occupied | black_occupied);
+    // should check that there are black pawns behind the moves
+    for (auto file : FILES) {
+        if (!(file & left_enpassant)) continue;
+        if (!(enpassant_b & file)) {
+            left_enpassant ^ (file & RANK_5);
+        } else if (!(get_black_pawns() & file & RANK_5)){
+            left_enpassant ^ (file & RANK_5);
+        }
+    }
+    while (left_enpassant) {
+        auto next_move = *this;
+        auto pawn_move = left_enpassant & -left_enpassant;
+        // remove black pawn
+        next_move.set_black_pawns(get_black_pawns() ^ (pawn_move >> 8));
+        // change white pawns
+        next_move.set_white_pawns((get_white_pawns() | pawn_move) ^ (pawn_move >> 9));
+        possible_moves.push_back(next_move);
+        left_enpassant &= -left_enpassant;
+    }
+    U64 right_enpassant = (get_white_pawns() << 7) & NOT_FILE_H & ~(white_occupied | black_occupied);
+    for (auto file : FILES) {
+        if (!(file & right_enpassant)) continue;
+        if (!(enpassant_b & file)) {
+            right_enpassant ^ (file & RANK_5);
+        } else if (!(get_black_pawns() & file & RANK_5)){
+            right_enpassant ^ (file & RANK_5);
+        }
+    }
+    while (right_enpassant) {
+        auto next_move = *this;
+        auto pawn_move = right_enpassant & -right_enpassant;
+        // remove black pawn
+        next_move.set_black_pawns(get_black_pawns() ^ (pawn_move >> 8));
+        // change white pawns
+        next_move.set_white_pawns((get_white_pawns() | pawn_move) ^ (pawn_move >> 7));
+        possible_moves.push_back(next_move);
+        right_enpassant &= -right_enpassant;
+    }
+    // knight
+    // bishop
+    // rook
+    // queen
+    // king 
     // do king, knight, 
 
 }

@@ -40,6 +40,29 @@ const uint64_t FILE_H = 0x8080808080808080;
 const U64 NOT_FILE_A = 0xfefefefefefefefe;
 const U64 NOT_FILE_H = 0x7f7f7f7f7f7f7f7f;
 
+const uint64_t RANKS[8] = {
+        0x00000000000000FF, // RANK_1
+        0x000000000000FF00, // RANK_2
+        0x0000000000FF0000, // RANK_3
+        0x00000000FF000000, // RANK_4
+        0x000000FF00000000, // RANK_5
+        0x0000FF0000000000, // RANK_6
+        0x00FF000000000000, // RANK_7
+        0xFF00000000000000  // RANK_8
+    };
+
+    // Array for FILE constants
+    const uint64_t FILES[8] = {
+        0x0101010101010101, // FILE_A
+        0x0202020202020202, // FILE_B
+        0x0404040404040404, // FILE_C
+        0x0808080808080808, // FILE_D
+        0x1010101010101010, // FILE_E
+        0x2020202020202020, // FILE_F
+        0x4040404040404040, // FILE_G
+        0x8080808080808080  // FILE_H
+    };
+
 const std::array<U64, 12> STARTING_POSITIONS = {
     // White pieces (first 6)
     0x000000000000FF00ULL,  // White Pawns (on Rank 2)

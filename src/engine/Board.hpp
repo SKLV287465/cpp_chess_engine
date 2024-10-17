@@ -118,4 +118,8 @@ class Board {
      * 7 black king under check
      */
     unsigned char board_info = 0;
+    unsigned char enpassant_w = 0;
+    unsigned char enpassant_b = 0;
+    
+
 };
