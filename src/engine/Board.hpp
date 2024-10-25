@@ -1,4 +1,4 @@
-#include <constants.hpp>
+#include "../../include/constants.hpp"
 #include <list>
 
 class Board {
@@ -43,7 +43,7 @@ class Board {
     inline bool get_black_lrook_moved() const{return board_info & 0b00001000;};
     inline bool get_black_rrook_moved() const{return board_info & 0b00000100;};
     inline bool get_white_king_check() const{return board_info & 0b00000010;};
-    inline bool get_white_king_check() const{return board_info & 0b00000001;};
+    inline bool get_black_king_check() const{return board_info & 0b00000001;};
 
     inline void set_white_king_moved(bool toggle) {
         if (toggle) {
@@ -94,7 +94,7 @@ class Board {
             board_info &= 0b11111101;
         }
     };
-    inline void set_white_king_check(bool toggle) {
+    inline void set_black_king_check(bool toggle) {
         if (toggle) {
             board_info |= 0b00000001;
         } else {

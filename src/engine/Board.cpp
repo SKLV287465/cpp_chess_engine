@@ -1,6 +1,7 @@
 #include "Board.hpp"
 #include <list>
 #include <algorithm>
+#include "../../include/constants.hpp"
 
 const int Board::piece_at_square(U64 rank, U64 file) {
     for (auto i = 0; i < 12; ++i) {
@@ -108,7 +109,7 @@ std::list<Board> Board::generate_white_moves() {
         double_push ^= pawn_move;
     }
     // pawn attack
-    U64 left_pawn_attack = (get_white_pawns() << 9) & NOT_FILE_A & black_occupied;
+    U64 left_pawn_attack = (get_white_pawns() << 9) & ~FILE_H & black_occupied;
     while (left_pawn_attack) {
         auto next_move = *this;
         auto pawn_move = left_pawn_attack & -left_pawn_attack;
@@ -122,12 +123,17 @@ std::list<Board> Board::generate_white_moves() {
         } else {
             next_move.set_white_pawns(next_move.get_white_pawns() | pawn_move);
         }
+        for (auto i = 6; i < 12; ++i) {
+            if (bitboards[i] & pawn_move) {
+                bitboards[i] ^= pawn_move;
+            }
+        }
         possible_moves.push_back(next_move);
         left_pawn_attack ^= pawn_move;
         promotion = false;
         
     }
-    U64 right_pawn_attack = (get_white_pawns() << 7) & NOT_FILE_H & black_occupied;
+    U64 right_pawn_attack = (get_white_pawns() << 7) & ~FILE_A & black_occupied;
     while (right_pawn_attack) {
         auto next_move = *this;
         auto pawn_move = right_pawn_attack & -right_pawn_attack;
@@ -141,6 +147,11 @@ std::list<Board> Board::generate_white_moves() {
         } else {
             next_move.set_white_pawns(next_move.get_white_pawns() | pawn_move);
         }
+        for (auto i = 6; i < 12; ++i) {
+            if (bitboards[i] & pawn_move) {
+                bitboards[i] ^= pawn_move;
+            }
+        }
         possible_moves.push_back(next_move);
         right_pawn_attack ^= pawn_move;
         promotion = false;
@@ -151,9 +162,9 @@ std::list<Board> Board::generate_white_moves() {
     for (auto file : FILES) {
         if (!(file & left_enpassant)) continue;
         if (!(enpassant_b & file)) {
-            left_enpassant ^ (file & RANK_5);
+            left_enpassant ^= (file & RANK_5);
         } else if (!(get_black_pawns() & file & RANK_5)){
-            left_enpassant ^ (file & RANK_5);
+            left_enpassant ^= (file & RANK_5);
         }
     }
     while (left_enpassant) {
@@ -170,9 +181,9 @@ std::list<Board> Board::generate_white_moves() {
     for (auto file : FILES) {
         if (!(file & right_enpassant)) continue;
         if (!(enpassant_b & file)) {
-            right_enpassant ^ (file & RANK_5);
+            right_enpassant ^= (file & RANK_5);
         } else if (!(get_black_pawns() & file & RANK_5)){
-            right_enpassant ^ (file & RANK_5);
+            right_enpassant ^= (file & RANK_5);
         }
     }
     while (right_enpassant) {
@@ -226,6 +237,7 @@ std::list<Board> Board::generate_white_moves() {
     U64 king_moves = (left | right | up | down | upLeft | upRight | downLeft | downRight) & ~white_occupied;
     while (king_moves) {
         auto next_move = *this;
+        next_move.set_white_king_moved(true);
         auto king_move = king_moves & -king_moves;
         // move king
         next_move.set_white_king(king_move);
@@ -249,7 +261,7 @@ std::list<Board> Board::generate_white_moves() {
         while ((bishop_ptr << 9) & ~FILE_H & ~RANK_1) {
             bishop_ptr <<= 9;
             if (bishop_ptr & white_occupied) break;
-            bishop_moves |= bishop_moves;
+            bishop_moves |= bishop_ptr;
             if (bishop_ptr & black_occupied) break;
         }
         bishop_ptr = bishop;
@@ -257,7 +269,7 @@ std::list<Board> Board::generate_white_moves() {
         while ((bishop_ptr << 7) & ~FILE_A & ~RANK_1) {
             bishop_ptr <<= 7;
             if (bishop_ptr & white_occupied) break;
-            bishop_moves |= bishop_moves;
+            bishop_moves |= bishop_ptr;
             if (bishop_ptr & black_occupied) break;
         }
         bishop_ptr = bishop;
@@ -265,7 +277,7 @@ std::list<Board> Board::generate_white_moves() {
         while ((bishop_ptr >> 7) & ~FILE_H & ~RANK_8) {
             bishop_ptr >>= 7;
             if (bishop_ptr & white_occupied) break;
-            bishop_moves |= bishop_moves;
+            bishop_moves |= bishop_ptr;
             if (bishop_ptr & black_occupied) break;
         }
         bishop_ptr = bishop;
@@ -273,7 +285,7 @@ std::list<Board> Board::generate_white_moves() {
         while ((bishop_ptr >> 9) & ~FILE_A & ~RANK_8) {
             bishop_ptr >>= 9;
             if (bishop_ptr & white_occupied) break;
-            bishop_moves |= bishop_moves;
+            bishop_moves |= bishop_ptr;
             if (bishop_ptr & black_occupied) break;
         }
         og_bishop_positions ^= bishop;
@@ -293,10 +305,170 @@ std::list<Board> Board::generate_white_moves() {
             bishop_moves ^= bishop_move;
         }
     }
-    
-    
-    
     // rook
+    U64 og_rook_pos = get_white_rooks();
+    while (og_rook_pos) {
+        U64 rook = og_rook_pos & -og_rook_pos;
+        U64 rook_ptr = rook;
+        U64 rook_moves = 0;
+        // up
+        while (rook_ptr << 8) {
+            rook_ptr <<= 8;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // down
+        while (rook_ptr >> 8) {
+            rook_ptr >>= 8;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // left
+        while ((rook_ptr << 1) & ~FILE_H) {
+            rook_ptr <<= 1;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // right
+        while ((rook_ptr >> 1) & ~FILE_A) {
+            rook_ptr >>= 1;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        og_rook_pos ^= rook;
+        // do collected moves
+        while (rook_moves) {
+            auto next_move = *this;
+            auto rook_move = rook_moves & -rook_moves;
+            if (rook & FILE_H & RANK_1) next_move.set_white_rrook_moved(true);
+            if (rook & FILE_A & RANK_1) next_move.set_white_lrook_moved(true);
+            // move the bishop
+            next_move.set_white_rooks((get_white_rooks() ^ rook) | rook_move);
+            if (rook_move & black_occupied) {
+                for (auto i = 6; i < 12; ++i) {
+                    next_move.bitboards[i] ^= rook_move;
+                    break;
+                }
+            }
+            possible_moves.push_back(next_move);
+            rook_moves ^= rook_move;
+        }
+    }
     // queen
-
+    // bishop
+    og_bishop_positions = get_white_queens();
+    while (og_bishop_positions) {
+        U64 bishop = og_bishop_positions & -og_bishop_positions;
+        U64 bishop_ptr = bishop;
+        U64 bishop_moves = 0;
+        // NW not file h and rank 1
+        while ((bishop_ptr << 9) & ~FILE_H & ~RANK_1) {
+            bishop_ptr <<= 9;
+            if (bishop_ptr & white_occupied) break;
+            bishop_moves |= bishop_ptr;
+            if (bishop_ptr & black_occupied) break;
+        }
+        bishop_ptr = bishop;
+        // NE
+        while ((bishop_ptr << 7) & ~FILE_A & ~RANK_1) {
+            bishop_ptr <<= 7;
+            if (bishop_ptr & white_occupied) break;
+            bishop_moves |= bishop_ptr;
+            if (bishop_ptr & black_occupied) break;
+        }
+        bishop_ptr = bishop;
+        // SW
+        while ((bishop_ptr >> 7) & ~FILE_H & ~RANK_8) {
+            bishop_ptr >>= 7;
+            if (bishop_ptr & white_occupied) break;
+            bishop_moves |= bishop_ptr;
+            if (bishop_ptr & black_occupied) break;
+        }
+        bishop_ptr = bishop;
+        // SE
+        while ((bishop_ptr >> 9) & ~FILE_A & ~RANK_8) {
+            bishop_ptr >>= 9;
+            if (bishop_ptr & white_occupied) break;
+            bishop_moves |= bishop_ptr;
+            if (bishop_ptr & black_occupied) break;
+        }
+        og_bishop_positions ^= bishop;
+        // do collected moves
+        while (bishop_moves) {
+            auto next_move = *this;
+            auto bishop_move = bishop_moves & -bishop_moves;
+            // move the bishop
+            next_move.set_white_queens((get_white_queens() ^ bishop) | bishop_move);
+            if (bishop_move & black_occupied) {
+                for (auto i = 6; i < 12; ++i) {
+                    next_move.bitboards[i] ^= bishop_move;
+                    break;
+                }
+            }
+            possible_moves.push_back(next_move);
+            bishop_moves ^= bishop_move;
+        }
+    }
+    // rook
+    og_rook_pos = get_white_queens();
+    while (og_rook_pos) {
+        U64 rook = og_rook_pos & -og_rook_pos;
+        U64 rook_ptr = rook;
+        U64 rook_moves = 0;
+        // up
+        while (rook_ptr << 8) {
+            rook_ptr <<= 8;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // down
+        while (rook_ptr >> 8) {
+            rook_ptr >>= 8;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // left
+        while ((rook_ptr << 1) & ~FILE_H) {
+            rook_ptr <<= 1;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        rook_ptr = rook;
+        // right
+        while ((rook_ptr >> 1) & ~FILE_A) {
+            rook_ptr >>= 1;
+            if (rook_ptr & white_occupied) break;
+            rook_moves |= rook_ptr;
+            if (rook_ptr & black_occupied) break;
+        }
+        og_rook_pos ^= rook;
+        // do collected moves
+        while (rook_moves) {
+            auto next_move = *this;
+            auto rook_move = rook_moves & -rook_moves;
+            // move the bishop
+            next_move.set_white_queens((get_white_queens() ^ rook) | rook_move);
+            if (rook_move & black_occupied) {
+                for (auto i = 6; i < 12; ++i) {
+                    next_move.bitboards[i] ^= rook_move;
+                    break;
+                }
+            }
+            possible_moves.push_back(next_move);
+            rook_moves ^= rook_move;
+        }
+    }
+    return possible_moves;
 }

@@ -2,7 +2,7 @@
 #define Board_HPP_
 
 #include <array>
-#include <constants.hpp>
+
 
 class GameBoard {
     public:

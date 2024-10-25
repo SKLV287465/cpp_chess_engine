@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_HPP_
+#define CONSTANTS_HPP_
+
 #include <cstdint>
 #include <array>
 
@@ -80,3 +83,5 @@ const std::array<U64, 12> STARTING_POSITIONS = {
     0x0800000000000000ULL,  // Black Queen (on d8)
     0x1000000000000000ULL   // Black King (on e8)
 };
+
+#endif
