@@ -14,3 +14,6 @@ This is my first attempt at creating a chess engine. I had originally planned to
 
 - move evaluation
 - search algorithm (will attempt to use monte carlo tree search)
+
+### DEPRECATED ###
+see https://github.com/SKLV287465/chess_engine
